@@ -1,0 +1,15 @@
+BBBBBBBBBBBBBBB
+B           B B
+BBB BBB BBB B B
+B B   B B B B B
+B BBBBB B BpB B
+B B     B   B B
+B BBB BBB BBB B
+B   B B   B   B
+B BBB BBB BBB B
+B B     B   B B
+B B BBB BBB B B
+B B   B   B B B
+B BBBBB BBBBB B
+B         a   B
+BBBBBBBBBBBBBBB
