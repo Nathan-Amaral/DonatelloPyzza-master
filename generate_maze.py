@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     i = 1
     while not game.isWon() :
-        time.sleep(0.05)
+        time.sleep(0.5)
         rand = random.randint(0, 3)
         actions = [Action.MOVE_FORWARD, Action.TOUCH, Action.TURN_LEFT, Action.TURN_RIGHT]
         squares = game.getSquaresDict()
@@ -42,4 +42,3 @@ if __name__ == '__main__':
         i += 1
     if game.isWon() :
         actions = [Action.TOUCH]
-        game.showMessage("Pizza trouvée ! The turtle stops moving.")
