@@ -48,7 +48,7 @@ donatellopyzza_qlearning/
 ### 1. Cloner le dépôt
 ```bash
 git clone https://github.com/Nathan-Amaral/DonatelloPyzza-master.git
-cd donatellopyzza_qlearning
+cd DonatelloPyzza-master
 ```
 
 ### 2. Créer un environnement virtuel
