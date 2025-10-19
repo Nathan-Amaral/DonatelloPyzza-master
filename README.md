@@ -1,134 +1,164 @@
-## DonatelloPyzza
+# 🍕🐢 DonatelloPyzza – Agent Q-Learning Intelligent
 
-DonatelloPyzza is a simple and educational game to help beginners learn algorithmic in Python in high school and university.
+## 🎯 Objectif
 
-A turtle can move through a grid and touch each cells until it finds the pizza.
-This game can be used at several levels:
-- for young beginners: they can hard-code a path to help the turtle find its pizza in small mazes.
-- for beginners: they can develop intuitive heuristics to find the pizza
-- for intermediate or advanced developers: they can develop a complex path finding method or AI-based solutions.
+Ce projet met en œuvre un **agent d’apprentissage par renforcement (Q-Learning)** capable d’apprendre à naviguer dans un **labyrinthe généré automatiquement** pour atteindre une **pizza** 🍕.  
+L’environnement est géré par la bibliothèque `donatellopyzza`, qui fournit :
+- des environnements de labyrinthe,
+- une tortue (agent) capable d’exécuter des actions,
+- et un système de feedback pour guider l’apprentissage.
 
+---
 
-![View of the game (please go to the homepage of the project to watch this gif)](https://github.com/MilowB/DonatelloPyzza/blob/master/views/example.gif)
+## 🧠 Principe du Q-Learning
 
+Le **Q-Learning** est une méthode d’apprentissage par renforcement **hors politique**.  
+L’agent apprend à associer à chaque état et action une valeur de qualité (*Q-value*), mise à jour à chaque étape selon l’équation de Bellman :
 
-## Installation
+```
+Q(s, a) ← Q(s, a) + α × [r + γ × max_a Q(s', a') − Q(s, a)]
+```
 
-### Dépendance système (Linux)
+- **s** : état actuel  
+- **a** : action effectuée  
+- **r** : récompense reçue  
+- **s'** : état suivant  
+- **α** : taux d’apprentissage  
+- **γ** : facteur de réduction (discount factor)
 
-Avant d'installer `donatellopyzza`, vous devez installer les bibliothèques nécessaires à `pygame` :
+L’agent explore aléatoirement au début (ε-greedy), puis apprend progressivement la meilleure stratégie pour atteindre la pizza.
 
+---
+
+## 🏗️ Structure du projet
+
+```
+donatellopyzza_qlearning/
+│
+├── generate_maze.py        # Code principal de l’agent Q-Learning
+├── README.md                 # Documentation (ce fichier)
+├── requirements.txt          # Dépendances Python
+└── environments/             # Environnements de test (.maze, .json, etc.)
+```
+
+---
+
+## ⚙️ Installation
+
+### 1. Cloner le dépôt
 ```bash
-sudo apt-get update
-sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
+git clone https://github.com/Nathan-Amaral/DonatelloPyzza-master.git
+cd donatellopyzza_qlearning
 ```
 
-### DonatelloPyzza
+### 2. Créer un environnement virtuel
+```bash
+python -m venv venv
+source venv/bin/activate   # macOS / Linux
+venv\Scripts\activate      # Windows
+```
 
-`pip install donatellopyzza`
+### 3. Installer les dépendances
+```bash
+pip install -r requirements.txt
+```
 
+**Exemple de contenu de `requirements.txt` :**
+```
+pygame
+donatellopyzza
+```
 
-## Getting started
+---
 
-First, import the right modules to run the game:
+## 🚀 Utilisation
 
+### 🧩 Exécution simple
+Lance l’entraînement de l’agent sur un environnement de test :
+```bash
+python generate_maze.py
+```
+
+### ⚙️ Personnalisation
+Tu peux modifier les paramètres directement dans la fonction `train_agent()` :
 ```python
-from donatellopyzza import Game
-from donatellopyzza import Action
-from donatellopyzza import Feedback
+agent = train_agent(
+    environment_name="test",   # Nom du labyrinthe
+    max_episodes=50,           # Nombre d'épisodes d'entraînement
+    show_gui=True              # Afficher ou non la GUI pygame
+)
 ```
 
-`Game` is a class that you will use to create a game instance.
+---
 
-Let's create the game and its environment:
+## 🔍 Détails techniques
 
+### États
+Un état est défini par :
+- la **position** (x, y),
+- l’**orientation** (0 à 3),
+- le **dernier feedback** (mur, pizza, vide…).
+
+Exemple d’état :
+```
+pos_5_7_ori_1_wall
+```
+
+### Actions possibles
+L’agent peut :
+- 🟩 `MOVE_FORWARD` → avancer d’une case  
+- 🔄 `TURN_LEFT` → tourner à gauche  
+- 🔁 `TURN_RIGHT` → tourner à droite  
+- ✋ `TOUCH` → vérifier la présence d’un obstacle ou de la pizza  
+
+### Récompenses
+
+| 🧾 Événement              | 💰 Récompense | 🧩 Description |
+|---------------------------|---------------|----------------|
+| 🍕 Pizza trouvée          | +100          | Objectif principal |
+| 👃 Pizza détectée         | +50           | Proximité du but |
+| 💥 Collision              | -15           | Heurter un mur |
+| 🚧 Toucher un mur         | -8            | Pénalité mineure |
+| 🗺️ Nouvelle case explorée | +8            | Bonus d’exploration |
+| ⏳ Étape neutre           | -0.5          | Coût par action |
+| 📡 Proximité de la pizza  | +3            | Encouragement |
+
+---
+
+## 📈 Suivi de l’apprentissage
+
+Pendant l’entraînement, la console affiche :
+```
+Épisode   5 | Étapes:  42 | Récompense:  180.5 | Succès: True
+Épisode  10 | Étapes:  31 | Récompense:  210.0 | Succès: True
+...
+Entraînement terminé. Meilleur chemin: 28 étapes.
+```
+
+---
+
+## 🧪 Tests de performance (optionnel)
+
+Une fois l’agent entraîné, tu peux le tester sur plusieurs parties **sans exploration** :
 ```python
-# specify the name of the maze
-__ENVIRONMENT__ = "maze"
-# display the interface (or not)
-__GUI__ = True
+from qlearning_agent import test_agent
 
-game = Game(__ENVIRONMENT__, __GUI__)
-# returns a turtle that execute actions on its environment
-turtle = game.start()
+test_agent(agent, environment_name="test", num_tests=5, show_gui=True)
 ```
 
-Once the game has started, you get a turtle instance which you can move around the board.
-To do this, the following instruction can be used:
+---
 
-```python
-feedback, _ = turtle.execute(Action.MOVE_FORWARD)
-print(feedback)
-```
+## 💡 Conseils d’amélioration
 
-You can use the feedback from the `execute()` method to see what happened after your action.
+- 📊 Ajouter une **visualisation des récompenses** au fil des épisodes avec `matplotlib`.  
+- 💾 Sauvegarder et charger la **Q-table** avec `pickle`.  
+- 🤖 Implémenter un **réseau de neurones (DQN)** pour une version plus avancée.  
+- 🔄 Introduire des **obstacles dynamiques** ou des **bonus aléatoires** pour enrichir l’environnement.
 
-Finally, let's run your turtle:
+---
 
-> python yourfile.py
+## 👨‍💻 Auteur
 
-## Learning the rules:  actions and feedbacks
-
-`Action` and `Feedback` define the different actions and feedbacks types. You can use the following actions in your code:
-
-    Action.MOVE_FORWARD -> make your turtle go one step forward
-    Action.TURN_RIGHT -> your turtle will turn on its right
-    Action.TURN_LEFT -> on its left
-    Action.TOUCH -> the turtle will touch the cell in front of it to know its type
-
-
-Depending on your action, the game can provide you one of the following feedback:
-
-    Feedback.COLLISION -> you just tried to walk in a wall !
-    Feedback.MOVED -> you successfully moved
-    Feedback.MOVED_ON_PIZZA -> your turtle is on the pizza (congratulation!)
-    Feedback.TOUCHED_WALL -> you just touched a wall
-    Feedback.TOUCHED_NOTHING -> the touched cell is empty (no wall, no pizza, you can walk on it)
-    Feedback.TOUCHED_PIZZA -> the turtle touched the pizza
-
-
-## Generating and save your own mazes
-
-`Maze` is a class used to generate and save new mazes. You can retrieve saved maze by their names as indicated in example files. A new maze is generated (and saved) as follow:
-
-```python
-from donatellopyzza import MazeGenerator
-
-generator = MazeGenerator()
-maze = generator.create_maze(10, 10)
-fn = "test"
-maze.save(maze, filename=fn)
-```
-
-For more details, you can find several complete examples of the game loop in the `examples` folder on the github repository of this project. You can also look for the documentation at this [link](https://milowb.github.io/DonatelloDocumentation/html/index.html)
-
-Have fun!
-
-
-## What's new
-
-- 2024-09-27 (v1.8)
-    Add a RLGame class facilitating the use of RL algorithm.
-- 2024-09-25 (v1.7)
-    Add a reward function in order to play the game with reinforcement learning. Add the possibility to change the color of each cell for debugging.
-- 2023-04-09 (v1.6)
-    Integration of an algorithm assessment class. Allows to evaluate automatically a solution on several mazes.
-- 2023-04-07 (v1.5)
-    Integration of a maze generator from Alexandru Văleanu (https://github.com/AlexandruValeanu/Mazify).
-- 2023-01-17 (v1.2)
-    Initial release
-
-
-## Roadmap
-
-- make several tests for this package
-- make tutorials to help beginners use this package
-- make a more formal documentation
-- promote this game through a website
-- ~~add a RLGame class to facilitate the use of RL algorithm for solving the game~~
-- ~~add a reward in the step() method to allow reinforcment learning~~
-- ~~adapt the GUI to resize it depending on the number of cells~~
-- ~~add a test infrastructure to validate users' algorithm on several mazes~~
-- ~~make possible to the user to select the difficulty of the maze when generating it~~
-- ~~debug the GUI~~
-- ~~add a gridworld generator~~
+**Projet DonatelloPyzza Q-Learning**  
+Développé par *Nathan Amaral* – 2025  
+Licence : **MIT**
